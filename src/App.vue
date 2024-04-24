@@ -1,27 +1,54 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" />
+  <div class="app">
+    <header class="header">
+      <p class="header__title">WireGuard VPN Keys</p>
+      <img
+        alt="WireGuard Logo"
+        class="header__logo"
+        src="@/assets/img/wireguard-icon-logo.svg"
+      />
+    </header>
+    <div class="container">
+      <keys-page></keys-page>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
-import { Options, Vue } from "vue-class-component";
-import HelloWorld from "./components/HelloWorld.vue";
+import KeysPage from '@/components/pages/KeysPage.vue';
 
-@Options({
+export default {
   components: {
-    HelloWorld,
+    KeysPage,
   },
-})
-export default class App extends Vue {}
+};
 </script>
 
 <style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+@import '@/assets/css/styles.module';
+
+.header {
+  display: flex;
+  padding: 0 30px;
+  width: 100%;
+  height: 100px;
+  margin-bottom: 20px;
+  align-items: center;
+  justify-content: space-between;
+  background: $red-main;
+  box-shadow: rgba(0, 0, 0, 0.15) 0 4px 4px;
+  font: {
+    size: 1.5rem;
+    weight: 600;
+  }
+
+  &__title {
+    color: white;
+  }
+
+  &__logo {
+    width: 75px;
+    height: 75px;
+  }
 }
 </style>
