@@ -11,7 +11,11 @@
           <h1 class="modal-window__title">
             <slot name="title"></slot>
           </h1>
-          <div aria-label="Close modal" class="modal-window__button_close">
+          <div
+            aria-label="Close modal"
+            class="modal-window__button_close"
+            @click="$emit('exit', false)"
+          >
             <img
               alt=""
               class="modal-window__icon_close"
@@ -20,9 +24,7 @@
           </div>
         </div>
         <div class="modal-window__body">
-          <code class="modal-window__key">
-            <slot></slot>
-          </code>
+          <slot></slot>
         </div>
         <div class="modal-window__footer">
           <slot name="footer"></slot>
@@ -47,6 +49,7 @@
   left: 0;
   right: 0;
   background-color: rgba(0, 0, 0, 0.3);
+  z-index: 100;
 }
 
 .modal-window {
@@ -55,52 +58,55 @@
   width: 100%;
   max-width: 500px;
   height: 50%;
-  min-height: 300px;
+  min-height: 500px;
   background: white;
   border-radius: 15px;
   overflow: hidden;
-}
 
-.modal-window__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  height: 35px;
-}
-
-.modal-window__title {
-  padding: 12px 12px 0;
-  font: {
-    size: 1.3rem;
-    weight: 600;
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 35px;
   }
-  margin: 0;
-}
 
-.modal-window__button_close {
-  padding: 10px 10px 0;
-  height: 100%;
-}
+  &__title {
+    padding: 12px 12px 0;
+    font: {
+      size: 1.2rem;
+      weight: 600;
+    }
+    margin: 0;
+  }
 
-.modal-window__icon_close {
-  height: 100%;
-}
+  &__button_close {
+    padding: 10px 10px 0;
+    height: 100%;
+    cursor: pointer;
+  }
 
-.modal-window__body {
-  padding: 12px;
-}
+  &__icon_close {
+    height: 100%;
+  }
 
-.modal-window__footer {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  height: 60px;
-  margin-top: auto;
-  padding: 0 12px;
-  background: $red-main;
+  &__body {
+    padding: 12px;
+    font-size: 1rem;
+    word-wrap: break-word;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: 60px;
+    margin-top: auto;
+    padding: 0 12px;
+    background: $red-main;
+  }
 }
 
 /* ------  Анимация модульного окна  ------ */

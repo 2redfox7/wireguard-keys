@@ -15,7 +15,7 @@
   justify-content: center;
   border: none;
   background: $red-main;
-  box-shadow: rgba(0, 0, 0, 0.15) 0 4px 4px;
+  color: white;
   font: {
     size: 1.1rem;
     weight: 600;
