@@ -1,5 +1,9 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import './registerServiceWorker';
+import router from '@/router';
 
-createApp(App).mount('#app');
+const app = createApp(App);
+app
+  .use(router)
+  .mount('#app');

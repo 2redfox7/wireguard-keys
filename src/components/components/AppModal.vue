@@ -5,6 +5,9 @@
         aria-describedby="modalDescription"
         aria-labelledby="modalTitle"
         class="modal-window"
+        :class="{
+        'modal-window_message': message,
+        }"
         role="dialog"
       >
         <div class="modal-window__header">
@@ -23,7 +26,10 @@
             />
           </div>
         </div>
-        <div class="modal-window__body">
+        <div class="modal-window__body"
+             :class="{
+        'modal-window_message__body': message,
+        }">
           <slot></slot>
         </div>
         <div class="modal-window__footer">
@@ -34,23 +40,13 @@
   </transition>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+defineProps<{
+  message: boolean;
+}>();
+</script>
 
 <style lang="scss" scoped>
-.modal-window_back {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0 20px;
-
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: rgba(0, 0, 0, 0.3);
-  z-index: 100;
-}
 
 .modal-window {
   display: flex;
@@ -62,6 +58,21 @@
   background: white;
   border-radius: 15px;
   overflow: hidden;
+
+  &_back {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 100;
+  }
 
   &__header {
     display: flex;
@@ -96,6 +107,17 @@
     word-wrap: break-word;
   }
 
+  &_message {
+    max-width: 600px;
+    height: 20%;
+    min-height: 150px;
+
+    &__body {
+      font-size: 1.1rem;
+      padding: 30px 12px;
+    }
+  }
+
   &__footer {
     display: flex;
     justify-content: flex-end;
@@ -108,6 +130,7 @@
     background: $red-main;
   }
 }
+
 
 /* ------  Анимация модульного окна  ------ */
 .modal-fade-enter,

@@ -2,7 +2,11 @@
   <div class="wrapper keys-page">
     <div class="keys-page__list">
       <div v-for="key in keys" :key="key.id" class="keys-page__key">
-        <app-modal v-show="isShow" class="keys-page__modal" @exit="closeModel">
+        <app-modal
+          v-show="isShow"
+          class="keys-page__modal"
+          @exit="isShow = false"
+        >
           <template #title> Информация о ключе</template>
           <pre class="modal__key">
           <code ref='keyText'>
@@ -15,18 +19,35 @@
                 alt=""
                 class="keys-page__icon"
                 src="@/assets/img/copy-icon.svg"
-                @click="copyText"
+                @click="copyText(key.data)"
               />
             </app-button>
             <app-button class="modal__button">Скачать</app-button>
-            <app-button class="modal__button">Удалить</app-button>
+            <app-button class="modal__button"
+            @click="isDelete = true">Удалить</app-button>
+          </template>
+        </app-modal>
+        <app-modal
+          v-show="isDelete"
+          class="keys-page__modal modal_delete"
+          :message='true'
+          @exit="isDelete = false"
+        >
+          <template #title>Подтверждение удаления ключа {{ key.id }}</template>
+          Вы точно хотите удалить ключ?
+          <template #footer>
+            <app-button class="modal__button" @click="isDelete = false"
+              >Отмена
+            </app-button>
+            <app-button class="modal__button"
+            @click="deleteKey">Удалить</app-button>
           </template>
         </app-modal>
         <app-input
           :id="key.id"
           :filename="'key-icon.svg'"
           class="keys-page__input"
-          @click="openModel"
+          @click="isShow = true"
         >
           {{ key.id }}
         </app-input>
@@ -39,7 +60,7 @@
             />
           </a>
         </app-button>
-        <app-button class="keys-page__button">
+        <app-button class="keys-page__button" @click="isDelete = true">
           <img
             alt=""
             class="keys-page__icon"
@@ -48,90 +69,65 @@
         </app-button>
       </div>
     </div>
-    <app-button class="keys-page__button_create">
+    <app-button class="keys-page__button_create"
+    @click="createKey">
       Создать новый ключ
     </app-button>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
 import AppInput from '@/components/components/AppInput.vue';
 import AppButton from '@/components/components/AppButton.vue';
 import AppModal from '@/components/components/AppModal.vue';
+import { KeyService } from '@/api/KeyService';
 
 export default defineComponent({
   components: { AppModal, AppButton, AppInput },
   setup() {
-    const keys = ref([
-      {
-        id: 'rus1_0rg045g',
-        data:
-          '[Interface]\n' +
-          'PrivateKey = oPaMoxDUtTiQaB58/R32UL3SqjIiaxj7SKrddIC3kk4=\n' +
-          'Address = 10.22.103.225/32\n' +
-          'DNS = 8.8.8.8\n\n' +
-          '[Peer]\n' +
-          'PublicKey = spdTjQ+mcONZ+UYcuUhi3tWEY/y9SvFbj2rZyWMRrRw=\n' +
-          'AllowedIPs = 0.0.0.0/0\n' +
-          'Endpoint = uk2.wg.finevpn.org:993\n' +
-          'PersistentKeepalive = 21',
-        url: 'https://via.placeholder.com/150/92c952.png',
-        file: '92c952.png',
-      },
-      {
-        id: 'ger7_575h35o',
-        data:
-          '[Interface]\n' +
-          'PrivateKey = oPaMoxDUtTiQaB58/R32UL3SqjIiaxj7SKrddIC3kk4=\n' +
-          'Address = 10.22.103.225/32\n' +
-          'DNS = 8.8.8.8\n\n' +
-          '[Peer]\n' +
-          'PublicKey = spdTjQ+mcONZ+UYcuUhi3tWEY/y9SvFbj2rZyWMRrRw=\n' +
-          'AllowedIPs = 0.0.0.0/0\n' +
-          'Endpoint = uk2.wg.finevpn.org:993\n' +
-          'PersistentKeepalive = 21',
-        url: 'https://via.placeholder.com/150/771796.png',
-        file: '771796.png',
-      },
-      {
-        id: 'rus2_84694j4',
-        data:
-          '[Interface]\n' +
-          'PrivateKey = oPaMoxDUtTiQaB58/R32UL3SqjIiaxj7SKrddIC3kk4=\n' +
-          'Address = 10.22.103.225/32\n' +
-          'DNS = 8.8.8.8\n\n' +
-          '[Peer]\n' +
-          'PublicKey = spdTjQ+mcONZ+UYcuUhi3tWEY/y9SvFbj2rZyWMRrRw=\n' +
-          'AllowedIPs = 0.0.0.0/0\n' +
-          'Endpoint = uk2.wg.finevpn.org:993\n' +
-          'PersistentKeepalive = 21',
-        url: 'https://via.placeholder.com/150/24f355.png',
-        file: '4f355.png',
-      },
-    ]);
+    const chatId = ref('');
+    const keys = ref<{ id: string, name: string, file: string, url: string, data: string }[]>([]);
     const isShow = ref(false);
-    const keyText = ref<HTMLElement | null>(null);
+    const isDelete = ref(false);
 
-    function closeModel(value: boolean) {
-      isShow.value = value;
+    // Загрузка списка ключей при монтировании компонента
+    onMounted(async () => {
+      await loadKeys();
+    });
+
+    // Загрузка списка ключей
+    async function loadKeys() {
+      keys.value = await KeyService.getAllKeys(chatId.value);
     }
 
-    function openModel() {
-      isShow.value = true;
+    // Удаление ключа
+    async function deleteKey(keyName: string) {
+      const isSuccess = await KeyService.deleteKey(chatId.value, keyName);
+      if (isSuccess) {
+        keys.value = keys.value.filter(key => key.name !== keyName);
+      }
     }
 
-    function copyText() {
-      navigator.clipboard.writeText(keyText?.value?.textContent || '');
+    // Создание нового ключа
+    async function createKey() {
+      const newKey = await KeyService.createKey(chatId.value);
+      if (newKey) {
+        keys.value.push(newKey);
+      }
+    }
+
+    function copyText(text: string) {
+      navigator.clipboard.writeText(text);
     }
 
     return {
       isShow,
-      closeModel,
-      openModel,
+      isDelete,
       copyText,
-      keyText,
       keys,
+      deleteKey,
+      createKey,
     };
   },
 });

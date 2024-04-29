@@ -11,19 +11,12 @@
       </div>
     </header>
     <div class="container">
-      <keys-page></keys-page>
+      <router-view></router-view>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import KeysPage from '@/components/pages/KeysPage.vue';
-
-export default {
-  components: {
-    KeysPage,
-  },
-};
 </script>
 
 <style lang="scss">
