@@ -15,6 +15,11 @@
     <app-button class="auth-page__button_auth" @click="checkUser">
       Авторизоваться
     </app-button>
+    <p class="auth-page__note">
+      Примечание: Напишите
+      <a href="https://t.me/CFUV_VPN_Bot">Telegram-боту</a>, чтобы
+      зарегистрироваться.
+    </p>
   </div>
 </template>
 
@@ -79,6 +84,10 @@ watch(username, () => {
 
   &__icon {
     height: 100%;
+  }
+
+  &__note {
+    color: lightcoral;
   }
 }
 </style>

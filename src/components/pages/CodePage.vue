@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import router from '@/router';
 import AppButton from '@/components/components/AppButton.vue';
@@ -31,17 +31,23 @@ export default defineComponent({
 
   setup() {
     const code = ref('');
+    const codeUser = ref('');
     const isError = ref(false);
     const route = useRoute();
+
+    onMounted(sendCode);
 
     function updateError(value: boolean): void {
       isError.value = value;
     }
 
-    async function checkCode() {
-      const codeUser = await KeyService.getCode(route.params.user as string);
-      if (codeUser) {
-        await router.push({
+    async function sendCode() {
+      codeUser.value = await KeyService.getCode(route.params.user as string);
+    }
+
+    function checkCode() {
+      if (codeUser.value === code.value) {
+        router.push({
           name: 'UserKeys',
           params: { user: route.params.user },
         });
