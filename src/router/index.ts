@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AuthPage from '@/components/pages/AuthPage.vue';
 import KeysPage from '@/components/pages/KeysPage.vue';
+import CodePage from '@/components/pages/CodePage.vue';
 
 const routes = [
   {
@@ -9,8 +10,13 @@ const routes = [
     component: AuthPage,
   },
   {
-    path: '/keys',
-    name: 'User Keys',
+    path: '/code/:user',
+    name: 'Code',
+    component: CodePage,
+  },
+  {
+    path: '/keys/:user',
+    name: 'UserKeys',
     component: KeysPage,
   },
 ];

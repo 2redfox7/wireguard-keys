@@ -8,11 +8,12 @@
     />
     <input
       :id="id"
-      :value="id"
+      :readonly="readonly"
+      :value="modelValue"
       class="input-group__input"
-      readonly
       tabindex="-1"
       type="text"
+      @input="emit('update:modelValue', $event.target.value)"
     />
   </label>
 </template>
@@ -20,7 +21,12 @@
 <script lang="ts" setup>
 defineProps<{
   id: string;
+  modelValue: string;
   filename: string;
+  readonly: boolean;
+}>();
+const emit = defineEmits<{
+  'update:modelValue': [modelValue: string];
 }>();
 </script>
 

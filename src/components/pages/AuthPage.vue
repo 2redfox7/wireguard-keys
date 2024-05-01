@@ -1,28 +1,84 @@
 <template>
-  <div>
-    <h1 class='title'></h1>
-    <vue-telegram-login
-      mode="callback"
-      telegram-login="YourTelegramBot"
-      @callback="yourCallbackFunction" />
+  <div class="wrapper auth-page">
+    <h1 class="auth-page__title">Авторизация через Telegram</h1>
+    <p class="auth-page__description">Введите имя пользователя:</p>
+    <app-input
+      id="input"
+      v-model="username"
+      :readonly="false"
+      filename="user-icon.svg"
+    >
+    </app-input>
+    <app-message v-show="isError" type="error">
+      Пользователь не зарегистрирован!
+    </app-message>
+    <app-button class="auth-page__button_auth" @click="checkUser">
+      Авторизоваться
+    </app-button>
   </div>
 </template>
 
-<script lang="js">
-import {vueTelegramLogin} from 'vue-telegram-login'
+<script lang="ts" setup>
+import { ref, watch } from 'vue';
+import router from '@/router';
+import AppInput from '@/components/components/AppInput.vue';
+import AppButton from '@/components/components/AppButton.vue';
+import AppMessage from '@/components/components/AppMessage.vue';
+import { KeyService } from '@/api/KeyService';
 
-export default {
-  name: 'your-component',
-  components: {vueTelegramLogin},
-  methods: {
-    yourCallbackFunction (user) {
-      // gets user as an input
-      // id, first_name, last_name, username,
-      // photo_url, auth_date and hash
-      console.log(user)
-    }
+const username = ref('');
+const isError = ref(false);
+
+async function checkUser() {
+  const isUser = await KeyService.getUser(username.value);
+  if (isUser) {
+    await router.push({
+      name: 'Code',
+      params: { user: username.value },
+    });
+    return;
   }
+  isError.value = true;
 }
+
+watch(username, () => {
+  if (isError.value) {
+    isError.value = false;
+  }
+});
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.auth-page {
+  max-width: 600px;
+  justify-content: center;
+  padding-bottom: 100px;
+
+  &__title {
+    align-self: center;
+    font-size: 1.3rem;
+  }
+
+  &__title,
+  &__description {
+    margin: 0;
+  }
+
+  &__button_auth {
+    margin-top: 10px;
+  }
+
+  &__button {
+    max-width: 80px;
+  }
+
+  &__link {
+    height: 100%;
+    width: 100%;
+  }
+
+  &__icon {
+    height: 100%;
+  }
+}
+</style>
