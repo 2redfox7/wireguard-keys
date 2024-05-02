@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { IPeer } from '@/interface/IPeer';
 
-const API_BASE_URL = 'localhost:3000'; // Замените на URL вашего сервера
+const API_BASE_URL = 'http://localhost:3000';
 
 export class KeyService {
   // Получить список всех ключей
@@ -20,7 +20,7 @@ export class KeyService {
   static async getCode(username: string): Promise<string> {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/users/${username}/code`,
+        `${API_BASE_URL}/auth/${username}/code`,
       );
       return response.data;
     } catch (error) {
