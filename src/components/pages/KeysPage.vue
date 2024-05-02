@@ -1,70 +1,74 @@
 <template>
   <div class="wrapper keys-page">
     <div class="keys-page__list">
+      <app-modal
+        v-show="isShowConfig"
+        :message="false"
+        class="keys-page__modal"
+        @exit="isShowConfig = false"
+      >
+        <template #title> Информация о ключе</template>
+        <pre
+          class="modal__key"
+        ><code>{{ selectedPeer?.data.config }}</code></pre>
+        <img :src="selectedPeer?.data.qrcode" alt="" class="modal__qr" />
+        <template #footer>
+          <app-button class="modal__button button_copy">
+            <img
+              alt=""
+              class="keys-page__icon"
+              src="@/assets/img/copy-icon.svg"
+              @click="copyText(selectedPeer?.data.config)"
+            />
+          </app-button>
+          <a
+            :download="selectedPeer?.name + '.conf'"
+            :href="selectedPeer?.path"
+            class="modal__link"
+          >
+            <app-button class="modal__button"> Скачать </app-button>
+          </a>
+          <app-button
+            class="modal__button"
+            @click="changeModal(selectedPeer, true, 'delete')"
+            >Удалить
+          </app-button>
+        </template>
+      </app-modal>
+      <app-modal
+        v-show="isShowDelete"
+        :message="true"
+        class="keys-page__modal modal_delete"
+        @exit="isShowDelete = false"
+      >
+        <template #title
+          >Подтверждение удаления ключа {{ selectedPeer?.name }}
+        </template>
+        Вы точно хотите удалить ключ?
+        <template #footer>
+          <app-button
+            class="modal__button"
+            @click="changeModal(selectedPeer, false, 'delete')"
+            >Отмена
+          </app-button>
+          <app-button
+            class="modal__button"
+            @click="deletePeer(selectedPeer?.name)"
+            >Удалить
+          </app-button>
+        </template>
+      </app-modal>
       <div v-if="peers.length === 0" class="keys-page__note">
         Список ваших VPN-ключей пуст
       </div>
       <div v-for="peer in peers" v-else :key="peer.name" class="keys-page__key">
-        <app-modal
-          v-show="isShow"
-          :message="false"
-          class="keys-page__modal"
-          @exit="isShow = false"
-        >
-          <template #title> Информация о ключе</template>
-          <pre
-            class="modal__key"
-          ><code ref='keyText'>{{ peer.data.config }}</code></pre>
-          <img :src="peer.data.qrcode" alt="" class="modal__qr" />
-          <template #footer>
-            <app-button class="modal__button button_copy">
-              <img
-                alt=""
-                class="keys-page__icon"
-                src="@/assets/img/copy-icon.svg"
-                @click="copyText(peer.data.config)"
-              />
-            </app-button>
-            <a
-              :download="peer.name + '.conf'"
-              :href="peer.path"
-              class="modal__link"
-            >
-            <app-button class="modal__button">
-                Скачать
-            </app-button>
-            </a>
-            <app-button class="modal__button" @click="isDelete = true"
-              >Удалить
-            </app-button>
-          </template>
-        </app-modal>
-        <app-modal
-          v-show="isDelete"
-          :message="true"
-          class="keys-page__modal modal_delete"
-          @exit="isDelete = false"
-        >
-          <template #title
-            >Подтверждение удаления ключа {{ peer.name }}
-          </template>
-          Вы точно хотите удалить ключ?
-          <template #footer>
-            <app-button class="modal__button" @click="isDelete = false"
-              >Отмена
-            </app-button>
-            <app-button class="modal__button" @click="deletePeer(peer.name)"
-              >Удалить
-            </app-button>
-          </template>
-        </app-modal>
         <app-input
           :id="peer.name"
           :filename="'key-icon.svg'"
           :model-value="peer.name"
           :readonly="true"
           class="keys-page__input"
-          @click="isShow = true"
+          @click="changeModal(peer, true, 'config')"
         >
           {{ peer.name }}
         </app-input>
@@ -81,7 +85,10 @@
             />
           </a>
         </app-button>
-        <app-button class="keys-page__button" @click="isDelete = true">
+        <app-button
+          class="keys-page__button"
+          @click="changeModal(peer, true, 'delete')"
+        >
           <img
             alt=""
             class="keys-page__icon"
@@ -110,17 +117,29 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const peers = ref<IPeer[]>([]);
-    const isShow = ref(false);
-    const isDelete = ref(false);
+    const isShowConfig = ref(false);
+    const isShowDelete = ref(false);
+    const selectedPeer = ref<IPeer | null>(null);
 
     // Загрузка списка ключей при монтировании компонента
     onMounted(async () => {
       await loadPeers();
     });
 
+    function changeModal(peer: IPeer | null, value: boolean, modal: string) {
+      switch (modal) {
+        case 'delete':
+          isShowDelete.value = value;
+          break;
+        case 'config':
+          isShowConfig.value = value;
+      }
+      selectedPeer.value = peer;
+    }
+
     // Загрузка списка ключей
     async function loadPeers() {
-      peers.value = await KeyService.getAllKeys(route.params.user as string);
+      /*peers.value = await KeyService.getAllKeys(route.params.user as string);*/
       peers.value.forEach(peer => {
         const blob = new Blob([peer.data.config], { type: 'text/plain' });
         peer.path = window.URL.createObjectURL(blob);
@@ -130,10 +149,10 @@ export default defineComponent({
     }
 
     // Удаление ключа
-    async function deletePeer(keyName: string) {
+    async function deletePeer(keyName: string | undefined) {
       const isSuccess = await KeyService.deleteKey(
         route.params.user as string,
-        keyName,
+        keyName || '',
       );
       if (isSuccess) {
         peers.value = peers.value.filter(key => key.name !== keyName);
@@ -152,17 +171,19 @@ export default defineComponent({
       }
     }
 
-    function copyText(text: string) {
-      navigator.clipboard.writeText(text);
+    function copyText(text: string | undefined) {
+      navigator.clipboard.writeText(text || '');
     }
 
     return {
-      isShow,
-      isDelete,
+      isShowConfig,
+      isShowDelete,
       copyText,
       peers,
       deletePeer,
       createPeer,
+      selectedPeer,
+      changeModal,
     };
   },
 });

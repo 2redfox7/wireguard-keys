@@ -19,9 +19,7 @@ export class KeyService {
 
   static async getCode(username: string): Promise<string> {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/auth/${username}/code`,
-      );
+      const response = await axios.get(`${API_BASE_URL}/auth/${username}/code`);
       return response.data;
     } catch (error) {
       console.error('Error while fetching code:', error);

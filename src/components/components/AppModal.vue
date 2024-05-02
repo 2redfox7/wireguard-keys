@@ -1,6 +1,6 @@
 <template>
   <transition name="modal-fade">
-    <div class="modal-window_back">
+    <div class="modal-window_back" @click.self="$emit('exit', false)">
       <div
         :class="{
           'modal-window_message': message,
