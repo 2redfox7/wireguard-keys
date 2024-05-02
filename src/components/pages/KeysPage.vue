@@ -1,18 +1,20 @@
 <template>
   <div class="wrapper keys-page">
     <div class="keys-page__list">
-      <div v-for="peer in peers" :key="peer.name" class="keys-page__key">
+      <div v-if="peers.length === 0" class="keys-page__note">
+        Список ваших VPN-ключей пуст
+      </div>
+      <div v-for="peer in peers" v-else :key="peer.name" class="keys-page__key">
         <app-modal
           v-show="isShow"
+          :message="false"
           class="keys-page__modal"
           @exit="isShow = false"
         >
           <template #title> Информация о ключе</template>
-          <pre class="modal__key">
-          <code ref='keyText'>
-            {{ peer.data }}
-          </code>
-        </pre>
+          <pre
+            class="modal__key"
+          ><code ref='keyText'>{{ peer.data.config }}</code></pre>
           <img :src="peer.data.qrcode" alt="" class="modal__qr" />
           <template #footer>
             <app-button class="modal__button button_copy">
@@ -36,14 +38,14 @@
           @exit="isDelete = false"
         >
           <template #title
-            >Подтверждение удаления ключа {{ peer.name }}</template
-          >
+            >Подтверждение удаления ключа {{ peer.name }}
+          </template>
           Вы точно хотите удалить ключ?
           <template #footer>
             <app-button class="modal__button" @click="isDelete = false"
               >Отмена
             </app-button>
-            <app-button class="modal__button" @click="deleteKey"
+            <app-button class="modal__button" @click="deletePeer(peer.name)"
               >Удалить
             </app-button>
           </template>
@@ -80,7 +82,7 @@
         </app-button>
       </div>
     </div>
-    <app-button class="keys-page__button_create" @click="createKey">
+    <app-button class="keys-page__button_create" @click="createPeer">
       Создать новый ключ
     </app-button>
   </div>
@@ -105,11 +107,11 @@ export default defineComponent({
 
     // Загрузка списка ключей при монтировании компонента
     onMounted(async () => {
-      await loadKeys();
+      await loadPeers();
     });
 
     // Загрузка списка ключей
-    async function loadKeys() {
+    async function loadPeers() {
       peers.value = await KeyService.getAllKeys(route.params.user as string);
       peers.value.forEach(peer => {
         const blob = new Blob([peer.data.config], { type: 'text/plain' });
@@ -120,7 +122,7 @@ export default defineComponent({
     }
 
     // Удаление ключа
-    async function deleteKey(keyName: string) {
+    async function deletePeer(keyName: string) {
       const isSuccess = await KeyService.deleteKey(
         route.params.user as string,
         keyName,
@@ -131,9 +133,13 @@ export default defineComponent({
     }
 
     // Создание нового ключа
-    async function createKey() {
+    async function createPeer() {
       const newKey = await KeyService.createKey(route.params.user as string);
       if (newKey) {
+        const blob = new Blob([newKey.data.config], { type: 'text/plain' });
+        newKey.path = window.URL.createObjectURL(blob);
+        const qrcodeImage = ref(`data:image/png;base64,${newKey.data.qrcode}`);
+        newKey.data.qrcode = qrcodeImage.value;
         peers.value.push(newKey);
       }
     }
@@ -147,8 +153,8 @@ export default defineComponent({
       isDelete,
       copyText,
       peers,
-      deleteKey,
-      createKey,
+      deletePeer,
+      createPeer,
     };
   },
 });
@@ -162,6 +168,11 @@ export default defineComponent({
     gap: 20px;
     height: calc(100% - 60px);
     overflow-y: scroll;
+  }
+
+  &__note {
+    color: lightcoral;
+    align-self: center;
   }
 
   &__key {
@@ -196,6 +207,10 @@ export default defineComponent({
 
 .modal__key {
   white-space: pre-wrap;
+}
+
+.modal__qr {
+  align-self: center;
 }
 
 .button_copy {

@@ -27,6 +27,13 @@ html {
   padding: 20px 0;
 }
 
+a:active,
+a:hover,
+a {
+  text-decoration: none;
+  color: #ae373a;
+}
+
 *,
 *::before,
 *::after {

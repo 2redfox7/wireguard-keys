@@ -10,4 +10,17 @@ module.exports = defineConfig({
       },
     },
   },
+  pwa: {
+    name: 'WireGuard VPN Keys',
+    themeColor: '#AE373A',
+    msTileColor: '#FFFFFF',
+    iconPaths: {
+      faviconSVG: '@/assets/img/wireguard-icon-logo.svg',
+      favicon32: '@/assets/img/wireguard-icon-logo32.png',
+      favicon16: '@/assets/img/wireguard-icon-logo16.png',
+      appleTouchIcon: '@/assets/img/wireguard-icon-logo.png',
+      maskIcon: '@/assets/img/wireguard-icon-logo.svg',
+      msTileImage: '@/assets/img/wireguard-icon-logo144.png',
+    },
+  },
 });

@@ -16,8 +16,7 @@
   </div>
 </template>
 
-<script lang="ts">
-</script>
+<script lang="ts"></script>
 
 <style lang="scss">
 @import '@/assets/css/styles.module';

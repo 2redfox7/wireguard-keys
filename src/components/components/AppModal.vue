@@ -2,12 +2,12 @@
   <transition name="modal-fade">
     <div class="modal-window_back">
       <div
+        :class="{
+          'modal-window_message': message,
+        }"
         aria-describedby="modalDescription"
         aria-labelledby="modalTitle"
         class="modal-window"
-        :class="{
-        'modal-window_message': message,
-        }"
         role="dialog"
       >
         <div class="modal-window__header">
@@ -26,10 +26,12 @@
             />
           </div>
         </div>
-        <div class="modal-window__body"
-             :class="{
-        'modal-window_message__body': message,
-        }">
+        <div
+          :class="{
+            'modal-window_message__body': message,
+          }"
+          class="modal-window__body"
+        >
           <slot></slot>
         </div>
         <div class="modal-window__footer">
@@ -47,13 +49,12 @@ defineProps<{
 </script>
 
 <style lang="scss" scoped>
-
 .modal-window {
   display: flex;
   flex-direction: column;
   width: 100%;
   max-width: 500px;
-  height: 50%;
+  height: 60%;
   min-height: 500px;
   background: white;
   border-radius: 15px;
@@ -102,9 +103,13 @@ defineProps<{
   }
 
   &__body {
+    display: flex;
+    flex-direction: column;
     padding: 12px;
     font-size: 1rem;
     word-wrap: break-word;
+    overflow-x: hidden;
+    overflow-y: scroll;
   }
 
   &_message {
@@ -130,7 +135,6 @@ defineProps<{
     background: $red-main;
   }
 }
-
 
 /* ------  Анимация модульного окна  ------ */
 .modal-fade-enter,
